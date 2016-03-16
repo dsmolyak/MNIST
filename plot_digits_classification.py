@@ -15,14 +15,15 @@ print(__doc__)
 # Author: Gael Varoquaux <gael dot varoquaux at normalesup dot org>
 # License: BSD 3 clause
 
+import time
 # Standard scientific Python imports
 import matplotlib.pyplot as plt
 
 # Import datasets, classifiers and performance metrics
 from sklearn import datasets, svm, metrics
 
-# The digits dataset
 digits = datasets.load_digits()
+
 
 # The data that we are interested in is made of 8x8 images of digits, let's
 # have a look at the first 3 images, stored in the `images` attribute of the
@@ -31,6 +32,7 @@ digits = datasets.load_digits()
 # images, we know which digit they represent: it is given in the 'target' of
 # the dataset.
 images_and_labels = list(zip(digits.images, digits.target))
+
 for index, (image, label) in enumerate(images_and_labels[:4]):
     plt.subplot(2, 4, index + 1)
     plt.axis('off')
@@ -45,8 +47,13 @@ data = digits.images.reshape((n_samples, -1))
 # Create a classifier: a support vector classifier
 classifier = svm.SVC(gamma=0.001)
 
+t1 = time.clock()
 # We learn the digits on the first half of the digits
 classifier.fit(data[:n_samples / 2], digits.target[:n_samples / 2])
+t2 = time.clock()
+total = t2-t1
+
+print 'Total Time to Train: ' + str(total) + ' seconds'
 
 # Now predict the value of the digit on the second half:
 expected = digits.target[n_samples / 2:]
