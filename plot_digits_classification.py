@@ -33,6 +33,8 @@ digits = datasets.load_digits()
 # the dataset.
 images_and_labels = list(zip(digits.images, digits.target))
 
+print images_and_labels[0]
+
 for index, (image, label) in enumerate(images_and_labels[:4]):
     plt.subplot(2, 4, index + 1)
     plt.axis('off')
