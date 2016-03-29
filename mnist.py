@@ -7,6 +7,7 @@ import os, struct
 from array import array as pyarray
 from numpy import append, array, int8, uint8, zeros
 import numpy as np
+from sklearn.svm import LinearSVC
 
 # Import datasets, classifiers and performance metrics
 from sklearn import datasets, svm, metrics
@@ -38,13 +39,13 @@ def load_mnist(dataset="training", digits=np.arange(10), path="."):
     img = pyarray("B", fimg.read())
     fimg.close()
 
-    ind = [ k for k in range(size) if lbl[k] in digits ]
+    ind = [k for k in range(size) if lbl[k] in digits]
     N = len(ind)
 
     images = zeros((N, rows, cols), dtype=uint8)
     labels = zeros((N, 1), dtype=int8)
     for i in range(len(ind)):
-        images[i] = array(img[ ind[i]*rows*cols : (ind[i]+1)*rows*cols ]).reshape((rows, cols))
+        images[i] = array(img[ind[i] * rows * cols: (ind[i] + 1) * rows * cols]).reshape((rows, cols))
         labels[i] = lbl[ind[i]]
 
     return images, labels
@@ -54,32 +55,25 @@ def load_mnist(dataset="training", digits=np.arange(10), path="."):
 images_train, labels_train = load_mnist(dataset="training", path="/home/smolydb1/Documents/Datasets/MNIST")
 images_test, labels_test = load_mnist(dataset="testing", path="/home/smolydb1/Documents/Datasets/MNIST")
 
-#Reformat labels_train
+# Reformat labels_train
 labels_formatted_train = np.zeros(len(labels_train))
 for i in range(0, len(labels_train)):
     labels_formatted_train[i] = labels_train[i][0]
 labels_train = labels_formatted_train
 
-#Reformat labels_test
+# Reformat labels_test
 labels_formatted_test = np.zeros(len(labels_test))
 for i in range(0, len(labels_test)):
     labels_formatted_test[i] = labels_test[i][0]
 labels_test = labels_formatted_test
 
 # images_and_labels_train = list(zip(images_train, labels_train))
-# print(images_test[0])
 
 # for index, (image, label) in enumerate(images_and_labels_train[:4]):
 #     plt.subplot(2, 4, index + 1)
 #     plt.axis('off')
 #     plt.imshow(image, cmap=plt.cm.gray_r, interpolation='nearest')
 #     plt.title('Training: %i' % label)
-
-# shuffle the data
-# rand             = np.random.RandomState(0)
-# shuffle          = rand.permutation(len(images_train))
-# data_train, labels_train = self.features[shuffle], self.labels[shuffle]
-
 
 # To apply a classifier on this data, we need to flatten the image, to
 # turn the data in a (samples, feature) matrix:
@@ -99,27 +93,25 @@ for img in images_test:
 
 # data_test = np.asarray(data_test)
 
-
-# for i in range(0, n_samples/2):
-#     print labels[i]
+print data_train[0]
 
 # Create a classifier: a support vector classifier
-classifier = svm.SVC(gamma=0.001)
+classifier = LinearSVC()
 
 t1 = time.clock()
 # We learn the digits on the first half of the digits
-classifier.fit(data_train[0:200], labels_train[0:200])
+classifier.fit(data_train[0:1000], labels_train[0:1000])
 t2 = time.clock()
-total = t2-t1
+total = t2 - t1
 
 print 'Total Time to Train: %s seconds' % (str(total))
 
 # Now predict the value of the digit on the second half:
 t1 = time.clock()
-expected = labels_test[0:100]
-predicted = classifier.predict(data_test[0:100])
+expected = labels_test[0:200]
+predicted = classifier.predict(data_test[0:200])
 t2 = time.clock()
-total = t2-t1
+total = t2 - t1
 
 # expected_and_predicted = list(zip(expected,predicted))
 # for i in range (len(expected_and_predicted)):
@@ -144,3 +136,6 @@ print("Confusion matrix:\n%s" % metrics.confusion_matrix(expected, predicted))
 #     plt.title('Prediction: %i' % prediction)
 #
 # plt.show()
+
+# During training, the classifier finds the label that occurs the most often, and then guesses during testing that everthing is most likely to be that mode label
+# However, during testing, the classifier can identify exact copies from training
