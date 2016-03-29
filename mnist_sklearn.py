@@ -1,15 +1,30 @@
 __author__ = 'smolydb1'
 
 import time
+import argparse
 # Standard scientific Python imports
 import matplotlib.pyplot as plt
 
 # Import datasets, classifiers and performance metrics
 from sklearn import datasets, svm, metrics
 from sklearn.datasets import fetch_mldata
-from sklearn import datasets
 from sklearn.svm import LinearSVC
 import numpy as np
+
+# construct the argument parser and parse the arguments
+ap = argparse.ArgumentParser()
+
+# let the user select a scale for the image size, default is 2
+ap.add_argument("-n", "--train", required=False, default=1000, help="number of images for training")
+
+ap.add_argument('-t', "--test", required=False, default=10000, help="number of images for testing")
+
+# parse the arguments
+args = vars(ap.parse_args())
+n_samples = int(args['train'])
+n_tests = int(args['test'])
+# out_img_dir = args['out_dir']
+
 
 dataset = fetch_mldata('MNIST Original', data_home='/home/smolydb1/Documents/Datasets/')
 features = np.array(dataset.data, 'int16')
@@ -28,16 +43,16 @@ classifier = LinearSVC()
 
 #Learn digits on 0 to n_samples
 t1 = time.clock()
-n_samples = 100
+
 classifier.fit(data_train[0:n_samples], labels_train[0:n_samples])
 t2 = time.clock()
 total = t2-t1
 
-print 'Total Time to Train: ' + str(total) + ' seconds\n'
+# print 'Total Time to Train: ' + str(total) + ' seconds\n'
 
 
 # Now predict the value of the digit on 0 to n_tests
-n_tests = 1000
+
 expected = labels_test[0:n_tests]
 predicted = classifier.predict(data_test[0:n_tests])
 

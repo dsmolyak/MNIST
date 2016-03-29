@@ -136,6 +136,3 @@ print("Confusion matrix:\n%s" % metrics.confusion_matrix(expected, predicted))
 #     plt.title('Prediction: %i' % prediction)
 #
 # plt.show()
-
-# During training, the classifier finds the label that occurs the most often, and then guesses during testing that everthing is most likely to be that mode label
-# However, during testing, the classifier can identify exact copies from training
