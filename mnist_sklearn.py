@@ -11,6 +11,8 @@ from sklearn import svm, metrics
 from sklearn.datasets import fetch_mldata
 from sklearn.svm import LinearSVC
 import numpy as np
+import cPickle
+
 
 # construct the argument parser and parse the arguments
 ap = argparse.ArgumentParser()
@@ -79,17 +81,33 @@ def test_classifier(i, classifier):
     plt.figure()
     plot_confusion_matrix(cm_normalized, title='Normalized confusion matrix: ' + str(i))
 
-i = 100
+i = start
 classifiers = []
-while i < 60000:
-    print i
-    clf = LinearSVC()
-    clf.fit(data_train[0:i], labels_train[0:i])
-    test_classifier(i,clf)
-    if geometric:
-        i *= factor
-    else:
-        i += difference
+clf = LinearSVC()
+
+# while i < 60000:
+#     print i
+#     clf = LinearSVC()
+#     clf.fit(data_train[0:i], labels_train[0:i])
+#     test_classifier(i,clf)
+#     if geometric:
+#         i *= factor
+#     else:
+#         i += difference
+
+# clf = LinearSVC()
+# clf.fit(data_train[0:55000], labels_train[0:55000])
+
+# # save the classifier
+# with open('my_dumped_classifier.pkl', 'wb') as fid:
+#     cPickle.dump(clf, fid)
+
+# load it again
+with open('my_dumped_classifier.pkl', 'rb') as fid:
+    clf2 = cPickle.load(fid)
+    test_classifier(51200,clf2)
+
+
 
 plt.show()
 
