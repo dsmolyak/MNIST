@@ -2,37 +2,45 @@ __author__ = 'smolydb1'
 
 import cv2
 import time
-from sklearn import svm, metrics
-from sklearn.datasets import fetch_mldata
-from sklearn.svm import LinearSVC
 import numpy as np
 import cPickle
 
 
-fid = open('my_dumped_classifier.pkl', 'rb')
+fid = open('my_poly_classifier.pkl', 'rb')
 clf2 = cPickle.load(fid)
+
+def show_contours(img):
+    im_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    im_th = cv2.GaussianBlur(im_gray, (5, 5), 0)
+    ret, im_th = cv2.threshold(im_th, 90, 255, cv2.THRESH_BINARY_INV)
+    roi, ctrs, hier = cv2.findContours(im_th.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    rects = [cv2.boundingRect(ctr) for ctr in ctrs]
+    for rect in rects:
+        cv2.rectangle(im_th, (rect[0], rect[1]), (rect[0] + rect[2], rect[1] + rect[3]), (255, 255, 255), 3)
+    cv2.imshow('Contours', im_th)
 
 def convert_to_data(img):
     im_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    im_gray = cv2.GaussianBlur(im_gray, (5, 5), 0)
-    im_th = cv2.resize(im_gray, (28, 28), interpolation=cv2.INTER_AREA)
-    ret, im_th = cv2.threshold(im_th, 100, 255, cv2.THRESH_BINARY_INV)
-
-    # im_th = binary_invert(im_th)
-    img_flt = im_th.flatten()
-    cv2.imshow('cool', im_th)
-    # print unflatten(img_flt)
-
-    # with open('my_dumped_classifier.pkl', 'rb') as fid:
-
-    my_image = [img_flt]
-    # cv2.imshow('wow', unflatten(data[9]))
-    predicted = clf2.predict(my_image)
-    im = cv2.imread("/home/smolydb1/Projects/MNIST/white.png")
-    cv2.putText(im, str(predicted[0]), (100,100), cv2.FONT_HERSHEY_TRIPLEX, 10, (255,255,255), 5)
-    cv2.imshow("Predicted", im)
-    print predicted
-        # print unflatten(data[5])
+    im_th = cv2.GaussianBlur(im_gray, (5, 5), 0)
+    ret, im_th = cv2.threshold(im_th, 90, 255, cv2.THRESH_BINARY_INV)
+    roi, ctrs, hier = cv2.findContours(im_th.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    print len(ctrs)
+    rects = [cv2.boundingRect(ctr) for ctr in ctrs]
+    for rect in rects:
+        cv2.rectangle(img, (rect[0], rect[1]), (rect[0] + rect[2], rect[1] + rect[3]), (0, 255, 0), 3)
+        leng = int(rect[3] * 1.5)
+        pt1 = int(rect[1] + rect[3] // 2 - leng // 2)
+        pt2 = int(rect[0] + rect[2] // 2 - leng // 2)
+        roi = im_th[pt1:pt1 + leng, pt2:pt2 + leng]
+        if (pt1 < 0):
+            break
+        roi = cv2.resize(roi, (28, 28), interpolation=cv2.INTER_AREA)
+        roi = cv2.dilate(roi, (3, 3))
+        img_flt = roi.flatten()
+        my_image = [img_flt]
+        predicted = clf2.predict(my_image)
+        cv2.putText(img, str(int(predicted[0])), (rect[0], rect[1]), cv2.FONT_HERSHEY_DUPLEX, 2, (0, 255, 255), 3)
+    cv2.imshow('Classifications and Rectangles', img)
 
 def binary_invert(img):
     for i in range(0,27):
@@ -49,23 +57,19 @@ def unflatten(img):
             matrix[i][j] = img[num]
     return matrix
 
-
 def show_webcam(mirror=False):
     cam = cv2.VideoCapture(0)
+    t1 = time.clock()
     while True:
         ret_val, img = cam.read()
         if mirror:
             img = cv2.flip(img, 1)
-
-        convert_to_data(img)
         cv2.imshow('my webcam', img)
-        # if cv2.waitKey(1) == 13:
-
-            # while True:
+        show_contours(img)
+        if cv2.waitKey(5) == 13:
+            convert_to_data(img)
         if cv2.waitKey(5) == 27:
             break  # esc to quit
-        # if cv2.waitKey(1) == 27:
-        #     break  # esc to quit
 
     cv2.destroyAllWindows()
 

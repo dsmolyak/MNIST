@@ -11,7 +11,9 @@ from sklearn import svm, metrics
 from sklearn.datasets import fetch_mldata
 from sklearn.svm import LinearSVC
 import numpy as np
+from sklearn.neighbors import KNeighborsClassifier
 import cPickle
+import cv2
 
 
 # construct the argument parser and parse the arguments
@@ -64,6 +66,14 @@ data, labels = features[shuffle], labels[shuffle]
 data_train, labels_train = data[0:60000], labels[0:60000]
 data_test, labels_test = data[60000:], labels[60000:]
 
+def unflatten(img):
+    matrix = np.zeros((28,28))
+    for i in range(0,27):
+        for j in range(0,27):
+            num = i * 28 + j
+            matrix[i][j] = img[num]
+    return matrix
+
 
 def test_classifier(i, classifier):
     expected = labels_test[0:len(labels_test)]
@@ -71,9 +81,6 @@ def test_classifier(i, classifier):
     cm = metrics.confusion_matrix(expected, predicted)
     cr = metrics.classification_report(expected, predicted)
     clf_scores = [str(i),cr[603:607],cr[613:617],cr[623:627]]
-    # print 'Precision: ' + cr[603:607]
-    # print 'Recall: ' + cr[613:617]
-    # print 'f1-score: ' + cr[623:627]
     writer.writerow(clf_scores)
     print("Classification report:\n%s\n" % (cr))
     print("Confusion matrix:\n%s\n\n" % (cm))
@@ -85,29 +92,31 @@ i = start
 classifiers = []
 clf = LinearSVC()
 
-# while i < 60000:
-#     print i
-#     clf = LinearSVC()
-#     clf.fit(data_train[0:i], labels_train[0:i])
-#     test_classifier(i,clf)
-#     if geometric:
-#         i *= factor
-#     else:
-#         i += difference
+# for i in range (0,100):
+#     if labels_train[i] == 7:
+#         print i
+#         img = unflatten(data_train[i])
+#         print img
+#         cv2.imshow('Seven ' + str(i), img)
 
-# clf = LinearSVC()
-# clf.fit(data_train[0:55000], labels_train[0:55000])
+while i < 1000:
+    print i
+    clf = svm.SVC(kernel='poly', degree=3, C=1)
+    clf.fit(data_train[0:i], labels_train[0:i])
+    test_classifier(i,clf)
+    if geometric:
+        i *= factor
+    else:
+        i += difference
 
-# # save the classifier
-# with open('my_dumped_classifier.pkl', 'wb') as fid:
+# save the classifier
+# with open('my_poly_classifier.pkl', 'wb') as fid:
 #     cPickle.dump(clf, fid)
 
 # load it again
-with open('my_dumped_classifier.pkl', 'rb') as fid:
-    clf2 = cPickle.load(fid)
-    test_classifier(51200,clf2)
-
-
+# with open('my_poly_classifier.pkl', 'rb') as fid:
+#     clf2 = cPickle.load(fid)
+#     test_classifier(0,clf2)
 
 plt.show()
 
