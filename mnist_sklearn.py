@@ -39,7 +39,7 @@ if factor == 0:
 
 ofile  = open('/home/smolydb1/Projects/MNIST/accuracy_data.csv', "wb")
 writer = csv.writer(ofile, delimiter=',', quotechar='"', quoting=csv.QUOTE_ALL)
-row = ["Training","Precision","Recall","F1-score"]
+row = ["Training","Precision","Recall","F1-score","Time Training","Time Testing"]
 writer.writerow(row)
 
 def plot_confusion_matrix(cm, title='Confusion matrix', cmap=plt.cm.Blues):
@@ -76,11 +76,22 @@ def unflatten(img):
 
 
 def test_classifier(i, classifier):
+    t1 = time.clock()
+    clf.fit(data_train[0:i], labels_train[0:i])
+    t2 = time.clock()
+    timeTrain = t2 - t1
+    print 'Total Time to Train: ' + str(timeTrain) + ' seconds\n'
+
     expected = labels_test[0:len(labels_test)]
+    t1 = time.clock()
     predicted = classifier.predict(data_test[0:len(data_test)])
+    t2 = time.clock()
+    timeTest = t2 - t1
+    print 'Total Time to Test: ' + str(timeTest) + ' seconds\n'
+
     cm = metrics.confusion_matrix(expected, predicted)
     cr = metrics.classification_report(expected, predicted)
-    clf_scores = [str(i),cr[603:607],cr[613:617],cr[623:627]]
+    clf_scores = [str(i),cr[603:607],cr[613:617],cr[623:627],timeTrain,timeTest]
     writer.writerow(clf_scores)
     print("Classification report:\n%s\n" % (cr))
     print("Confusion matrix:\n%s\n\n" % (cm))
@@ -99,15 +110,23 @@ clf = LinearSVC()
 #         print img
 #         cv2.imshow('Seven ' + str(i), img)
 
-while i < 1000:
+while i < 3300:
     print i
-    clf = svm.SVC(kernel='poly', degree=3, C=1)
-    clf.fit(data_train[0:i], labels_train[0:i])
+    # clf = svm.SVC(kernel='poly', degree=3, C=1)
+    clf = LinearSVC()
     test_classifier(i,clf)
     if geometric:
         i *= factor
     else:
         i += difference
+
+# clf = svm.SVC(kernel='poly', degree=3, C=1)
+# t1 = time.clock()
+# clf.fit(data_train[0:10000], labels_train[0:10000])
+# t2 = time.clock()
+# total = t2 - t1
+# print 'Total Time to Train: ' + str(total) + ' seconds\n'
+# test_classifier(10000,clf)
 
 # save the classifier
 # with open('my_poly_classifier.pkl', 'wb') as fid:

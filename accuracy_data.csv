@@ -1,1 +1,2 @@
-"Training","Precision","Recall","F1-score"
+"Training","Precision","Recall","F1-score","Time Training","Time Testing"
+"3200","0.83","0.83","0.83","1.441968","0.10450399999999993"
